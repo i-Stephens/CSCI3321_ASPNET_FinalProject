@@ -21,27 +21,68 @@ namespace CSCI3321_ASPNET_FinalProject
             /// 5. Publisher's name
             /// 6. Genre
             /// 
-            // 1. Create a SqlConnection object
-            SqlConnection conn = new SqlConnection();
-            conn.ConnectionString = WebConfigurationManager.ConnectionStrings["DBConnectionString"].ConnectionString;
 
-            // 2. Create a SqlCommand object using the above connection object
-            SqlCommand cmd = new SqlCommand();
-            cmd.Connection = conn;
-            cmd.CommandText = "Your SQL statements go there";
-
-            // 3. Open the connection and execute the command
-            // store the returned data in a SqlDataReader object
-            conn.Open();
-            SqlDataReader reader = cmd.ExecuteReader();
-
-            // 4. if there is data in the SqlDataReader object
-            // then loop through each record to build the table to display the books
-            if (reader.HasRows)
+            if (!Page.IsPostBack)
             {
-                // Build the table 
-            }
+                // 1. Create a SqlConnection object
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString = WebConfigurationManager.ConnectionStrings["DBConnectionString"].ConnectionString;
 
+                // 2. Create a SqlCommand object using the above connection object
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandText = "SELECT * FROM Books INNER JOIN Authors ON Books.AuthorID = Authors.AuthorID " +
+                    "INNER JOIN Publishers ON Books.PublisherID = Publishers.PublisherID INNER JOIN Genres ON " +
+                    "Books.GenreID = Genres.GenreID";
+                cmd.Connection = conn;
+
+                // 3. Open the connection and execute the command
+                // store the returned data in a SqlDataReader object
+                conn.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                // 4. if there is data in the SqlDataReader object
+                // then loop through each record to build the table to display the books
+                if (reader.HasRows)
+                {
+                     while (reader.Read())
+                    {
+                        TableRow tr = new TableRow();
+                        TableCell tc = new TableCell();
+
+                        tc.Text = reader["Title"].ToString();
+                        tr.Cells.Add(tc);
+
+                        tc = new TableCell();
+                        tc.Text = reader["LastName"].ToString();
+                        tr.Cells.Add(tc);
+
+                        tc = new TableCell();
+                        tc.Text = reader["FirstName"].ToString();
+                        tr.Cells.Add(tc);
+
+                        tc = new TableCell();
+                        tc.Text = reader["Price"].ToString();
+                        tr.Cells.Add(tc);
+
+                        tc = new TableCell();
+                        var arr = reader["PublishDate"].ToString().Split(' ');  // removes time from the string
+                        tc.Text = arr[0].ToString();
+                        tr.Cells.Add(tc);
+
+                        tc = new TableCell();
+                        tc.Text = reader["PublisherName"].ToString();
+                        tr.Cells.Add(tc);
+
+                        tc = new TableCell();
+                        tc.Text = reader["GenreName"].ToString();
+                        tr.Cells.Add(tc);
+
+                        tblBookCollection.Rows.Add(tr);
+                    }
+                }
+
+                conn.Close();
+            }
         }
     }
 }
